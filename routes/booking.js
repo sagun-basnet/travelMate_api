@@ -1,9 +1,9 @@
 import express from "express";
-import {userDetail} from '../controllers/user.js'
+import {bookDetail} from '../controllers/booking.js'
 
 const router = express.Router();
 
-router.get("/get", userDetail);
+router.post("/", bookDetail);
 
 
 export default router;

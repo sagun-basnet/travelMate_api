@@ -28,6 +28,56 @@ export const register = (req, res) =>{
     })
     
 }
+export const guideRegister = (req, res) =>{
+    //check existing user
+    const q = "SELECT * from user WHERE email = ?"
+    db.query(q,[req.body.email], (err,data)=>{
+        if(err) return res.json(err);
+        if(data.length) return res.status(409).json("User already exists!");
+
+        //Hash the password and create a user
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(req.body.password, salt);
+
+        const q = "INSERT INTO user(`name`, `email`,`password`,`phone`,`role`) VALUES(?,'guide')";
+        const values = [
+            req.body.name,
+            req.body.email,
+            hash,
+            req.body.phone,
+        ]
+
+        db.query(q,[values], (err,data) =>{
+            if(err) return res.json(err);
+            return res.status(200).json("User has been created");
+        })
+    })
+    
+}
+export const addPackage = (req, res) =>{
+
+        const q = "INSERT INTO packages(`pac_name`, `pac_description`,`cost`,`time`,`mainImg`,`img2`, `img3`) VALUES(?)";
+        const values = [
+            req.body.pac_title,
+            req.body.pac_description,
+            req.body.pac_cost,
+            req.body.pac_time,
+            req.body.mainImg,
+            req.body.img2,
+            req.body.img3,
+        ]
+
+        db.query(q,[values], (err,data) =>{
+            if (err) {
+                console.error("Error aayo:", err);
+                res.status(500).json({ error: "An error occurred", details: err.message });
+            } else {
+              console.log("Package has been created");
+              res.json({ message: "Payment successful" });
+            }
+        })
+    
+}
 export const login = (req, res) =>{
     //check user exist or not...
 
