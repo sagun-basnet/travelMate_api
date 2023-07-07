@@ -59,6 +59,47 @@ app.put('/api/packages/:id', (req, res) => {
     });
   });
 
+  //for complete booking
+app.put('/api/booking/complete/:bookingId', (req, res) => {
+    const bookingId = req.params.bookingId;
+  
+    // Retrieve the data from the `booking` table
+    const selectQuery = 'SELECT * FROM booking WHERE id = ?';
+    db.query(selectQuery, [bookingId], (error, results) => {
+      if (error) {
+        console.error('Error retrieving booking data:', error);
+        return res.status(500).json({ message: 'An error occurred' });
+      }
+  
+      if (results.length === 0) {
+        // If the booking data does not exist, return an error response
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+  
+      const bookingData = results[0];
+      // console.log(bookingData);
+  
+      // Insert the data into the `booked` table
+      const insertQuery = 'INSERT INTO booked (user_id, pac_id, amount, start_date) VALUES (?,?,?,?)';
+      db.query(insertQuery, [bookingData.user_id, bookingData.pac_id, bookingData.amount, bookingData.start_date], (error) => {
+        if (error) {
+          console.error('Error inserting data into booked table:', error);
+          return res.status(500).json({ message: 'An error occurred' });
+        }
+  
+        // Delete the data from the `booking` table
+        const deleteQuery = 'DELETE FROM booking WHERE id = ?';
+        db.query(deleteQuery, [bookingId], (error) => {
+          if (error) {
+            console.error('Error deleting data from booking table:', error);
+            return res.status(500).json({ message: 'An error occurred' });
+          }
+  
+          res.sendStatus(200);
+        });
+      });
+    });
+  });
 
 app.listen(5000, () =>{
     console.log("Connected to the port 5000.");
